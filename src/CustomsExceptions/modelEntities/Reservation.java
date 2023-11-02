@@ -1,5 +1,7 @@
 package CustomsExceptions.modelEntities;
 
+import CustomsExceptions.Exceptions.DomainException;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.SimpleTimeZone;
@@ -11,7 +13,10 @@ public class Reservation {
     private Date Chekout;
 
     private static SimpleDateFormat sdf =new SimpleDateFormat("dd/MM/yyyy");
-    public Reservation(int roomNumber, Date checkin, Date chekout) {
+    public Reservation(int roomNumber, Date checkin, Date chekout) throws DomainException {
+        if(!Chekout.after(checkin)){
+            throw new DomainException( "ckeck-out date must be after checkin date");
+        }
         this.roomNumber = roomNumber;
         Checkin = checkin;
         Chekout = chekout;
@@ -38,22 +43,22 @@ public class Reservation {
         long diff = getChekout().getTime() - getCheckin().getTime();
        return TimeUnit.DAYS.convert(diff,TimeUnit.MILLISECONDS);
     }
-    public String updateDates(Date checkin, Date checkout){
+    public void updateDates(Date checkin, Date checkout) throws DomainException {
         Date now = new Date();
         if(checkin.before(now) || checkout.before(now)){
-           return "Reservation dates for updates must be future";
+          throw new DomainException( "Reservation dates for updates must be future");
         }
         if(!checkout.after(checkin)){
-           return  "ckeck-out date must be after checkin date";
+           throw new DomainException( "ckeck-out date must be after checkin date");
         }
         this.Checkin = checkin;
         this.Chekout = checkout;
-        return null;
+
     }
     @Override
     public String toString(){
-        return "room"+roomNumber+"Check-in : "+ sdf.format(getCheckin())+
-                "check-out: "+sdf.format(getChekout())+
-                ", "+ duration()+" nights";
+        return "room"+roomNumber+"\nCheck-in : "+ sdf.format(getCheckin())+
+                "\ncheck-out: "+sdf.format(getChekout())+
+                ", "+ duration()+"\n nights";
     }
 }
